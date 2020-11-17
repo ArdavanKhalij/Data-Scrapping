@@ -2,11 +2,13 @@
 
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
 ######### Libraries #########
 ########## Welcome ##########
 
 print("Hello Dr. Asim Shrestha, Welcome!")
+print("It would take a while...")
 
 ########## Welcome ##########
 ####### Get the topic #######
@@ -53,7 +55,9 @@ def GetTheNumberDates(Dates):
 ## Get the number of dates ##
 ######### Main Page #########
 
+records = []
 MyURL = 'https://www.tigerdroppings.com/rant/lsu-sports/'
+URLS = []
 r = requests.get(MyURL)
 soup = BeautifulSoup(r.text, 'html.parser')
 Topics = soup.find_all('h2')
@@ -63,5 +67,15 @@ FinalTopics = GetTheTopic(Topics)
 FinalNameOfStarter = GetTheStarterName(NameOfStarter)
 FinalReplies = GetTheNumberReplies(RepliesAndDates)
 FinalDates = GetTheNumberDates(RepliesAndDates)
+for i in range(0, len(Topics)):
+    URLS.append('https://www.tigerdroppings.com'+str(Topics[i].find('a')['href']))
+for i in range(0, 3):
+    r = requests.get(URLS[i])
+    soup = BeautifulSoup(r.text, 'html.parser')
+    comments = soup.find_all('div', attrs={'class': 'pText'})
+    comment = comments[0].text
+    records.append((FinalTopics[i], FinalNameOfStarter[i], FinalReplies[i], FinalDates[i], comment))
+df = pd.DataFrame(records, columns=['Topic','Starter','Replies','Date','First_Comment'])
+print("The output in a csv table form is ready.")
 
 ######### Main Page #########
